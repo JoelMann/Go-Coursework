@@ -1,39 +1,32 @@
-// Let us assume the following formula for
-// displacement s as a function of time t, acceleration a, initial velocity vo,
-// and initial displacement so.
+package main
+
+import (
+	"fmt"
+)
+
+func GetUserInput(var_type string) float64 {
+	fmt.Printf("Please input the %s: ", var_type)
+	var input float64
+	fmt.Scan(&input)
+	return input
+}
 
 // s = ½ a t2 + vot + so
+func GenDisplaceFn(a float64, vo float64, so float64) func(float64) float64 {
+	fn := func(time float64) float64 {
+		return 0.5*a*(time*time) + (vo * time) + so
+	}
+	return fn
+}
 
-// Write a program which first prompts the user
-// to enter values for acceleration, initial velocity, and initial displacement.
-// Then the program should prompt the user to enter a value for time and the
-// program should compute the displacement after the entered time.
+func main() {
+	user_a := GetUserInput("acceleration")
+	user_vo := GetUserInput("initial velocity")
+	user_so := GetUserInput("initial displacement")
 
-// You will need to define and use a function
-// called GenDisplaceFn() which takes three float64
-// arguments, acceleration a, initial velocity vo, and initial
-// displacement so. GenDisplaceFn()
-// should return a function which computes displacement as a function of time,
-// assuming the given values acceleration, initial velocity, and initial
-// displacement. The function returned by GenDisplaceFn() should take one float64 argument t, representing time, and return one
-// float64 argument which is the displacement travelled after time t.
+	fn := GenDisplaceFn(user_a, user_vo, user_so)
 
-// For example, let’s say that I want to assume
-// the following values for acceleration, initial velocity, and initial
-// displacement: a = 10, vo = 2, so = 1. I can use the
-// following statement to call GenDisplaceFn() to
-// generate a function fn which will compute displacement as a function of time.
-
-// fn := GenDisplaceFn(10, 2, 1)
-
-// Then I can use the following statement to
-// print the displacement after 3 seconds.
-
-// fmt.Println(fn(3))
-
-// And I can use the following statement to print
-// the displacement after 5 seconds.
-
-// fmt.Println(fn(5))
-
-// Submit your Go program source code.
+	fmt.Println("Below are the tests returning total displacement of the function returned by GenDisplaceFn() for time = 3 and time = 5:")
+	fmt.Println(fn(3))
+	fmt.Println(fn(5))
+}
