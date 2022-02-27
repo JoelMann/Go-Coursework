@@ -45,7 +45,7 @@ func sanitizeUserInput(input string) (string, string) {
 	if len(splitStrings) < 2 {
 		splitStrings = append(splitStrings, "help", "help") //prevents index array issues. Not worrying about size at this time.
 	}
-	return splitStrings[0], splitStrings[1]
+	return strings.ToLower(splitStrings[0]), strings.ToLower(splitStrings[1])
 }
 
 func callAnimalMethod(animal string, descriptor string) {
