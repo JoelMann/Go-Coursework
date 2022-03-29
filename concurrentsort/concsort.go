@@ -73,9 +73,7 @@ func asyncQuickSort(wg *sync.WaitGroup, listToSort []int, start int, end int) {
 func mergeTwoDimSlice(twoDimSlice [][]int) []int {
 	var returnSlice = make([]int, 0)
 	for i := 0; i < len(twoDimSlice); i++ {
-		for j := 0; j < len(twoDimSlice[i]); j++ {
-			returnSlice = append(returnSlice, twoDimSlice[i][j])
-		}
+		returnSlice = append(returnSlice, twoDimSlice[i]...)
 	}
 	return returnSlice
 }
