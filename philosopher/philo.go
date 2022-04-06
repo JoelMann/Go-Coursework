@@ -1,21 +1,3 @@
-// Implement the dining philosopher’s problem with the following constraints/modifications.
-
-// There should be 5 philosophers sharing chopsticks, with one chopstick between each adjacent pair of philosophers.
-
-// Each philosopher should eat only 3 times (not in an infinite loop as we did in lecture)
-
-// The philosophers pick up the chopsticks in any order, not lowest-numbered first (which we did in lecture).
-
-// In order to eat, a philosopher must get permission from a host which executes in its own goroutine.
-
-// The host allows no more than 2 philosophers to eat concurrently.
-
-// Each philosopher is numbered, 1 through 5.
-
-// When a philosopher starts eating (after it has obtained necessary locks) it prints “starting to eat <number>” on a line by itself, where <number> is the number of the philosopher.
-
-// When a philosopher finishes eating (before it has released its locks) it prints “finishing eating <number>” on a line by itself, where <number> is the number of the philosopher.
-
 package main
 
 import (
@@ -40,32 +22,36 @@ type Host struct {
 
 func (h *Host) AskForPermission() bool {
 	h.request.Lock()
-	if h.numberOfEating < 2 {
+	if h.numberOfEating < 2 { //This is not a fair test, but does prevent deadlock.
 		return true
 	} else {
 		return false
 	}
 }
 
-func (p Philosopher) ImDoneEatingMom(god *Host) {
+func (p Philosopher) PickedUpChopsticks(god *Host) {
 	god.numberOfEating -= 1
 	god.request.Unlock()
 }
 
-func (p Philosopher) EatRice(god *Host) {
+func (p Philosopher) EatRice(god *Host, wg *sync.WaitGroup) {
 	if god.AskForPermission() {
 		god.numberOfEating += 1
 		p.leftChopstick.mu.Lock()
 		p.rightChopstick.mu.Lock()
-		fmt.Printf("Philosopher %d is eating\n", p.number)
+		p.PickedUpChopsticks(god)
+		fmt.Printf("Starting to eat #%d\n", p.number)
+		fmt.Printf("Finished eating #%d\n", p.number)
 		p.leftChopstick.mu.Unlock()
 		p.rightChopstick.mu.Unlock()
-		p.ImDoneEatingMom(god)
+		wg.Done()
+	} else {
+		p.EatRice(god, wg)
 	}
 }
 
 func main() {
-	fmt.Println("sanity test")
+	var wg sync.WaitGroup
 	var groupOfPhilosophers []Philosopher
 	chopsticks := make([]Chopstick, 5)
 	bob := Host{numberOfEating: 0}
@@ -79,10 +65,13 @@ func main() {
 		groupOfPhilosophers = append(groupOfPhilosophers, phil)
 	}
 
-	for {
+	for i := 0; i < len(groupOfPhilosophers)*3; i++ {
+		wg.Add(1)
 		for i := 0; i < 5; i++ {
-			go groupOfPhilosophers[i].EatRice(&bob)
+			go groupOfPhilosophers[i].EatRice(&bob, &wg)
+			//note: It may seem to be running sequentially - its not, can increase parent loop to see.
 		}
 	}
+	wg.Wait()
 
 }
